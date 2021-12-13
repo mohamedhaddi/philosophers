@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:19:11 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/12 18:27:03 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/13 01:34:33 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,10 +101,12 @@ bool    is_over_int(char *str)
     return (check_every_digit(i, len, last_digit, (char *[2]){str, max_int}));
 }
 
-int are_valid_numbers(char **argv, int argc)
+int are_valid_args(char **argv, int argc)
 {
     int i;
 
+	if (argc < 5 || argc > 6)
+		return (false);
     i = 1;
     while (i < argc)
     {

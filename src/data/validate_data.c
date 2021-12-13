@@ -6,13 +6,13 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:25:13 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/12 18:27:13 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/13 01:29:40 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/philo.h"
 
-bool is_valid_data(t_data data)
+bool valid_data(t_data data)
 {
 	if (data.number_of_philosophers <= 0)
 		return (false);

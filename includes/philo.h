@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/12 18:29:06 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/13 01:34:51 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ typedef	struct	s_data {
 	t_optional_arg number_of_meals;
 }				t_data;
 
-int are_valid_numbers(char **argv, int argc);
+int are_valid_args(char **argv, int argc);
 t_data get_data(char **argv, int argc);
-bool is_valid_data(t_data data);
+bool are_valid_data(t_data data);
 
 #endif

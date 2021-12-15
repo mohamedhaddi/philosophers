@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/13 01:34:51 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/15 15:07:08 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 typedef	struct	s_optional_arg {
 	bool is_set;
@@ -36,6 +37,6 @@ typedef	struct	s_data {
 
 int are_valid_args(char **argv, int argc);
 t_data get_data(char **argv, int argc);
-bool are_valid_data(t_data data);
+bool is_valid_data(t_data data);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/15 17:50:13 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/15 18:24:35 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,10 @@ void print_data(t_data data)
 	printf("%d\n", data.number_of_meals.is_set);
 }
 
-void create_locks(pthread_mutex_t *locks, int size)
+void init_locks(pthread_mutex_t *locks, int size)
 {
 	int i;
 
-	locks = malloc(sizeof(pthread_mutex_t) * size);
 	i = 0;
 	while (i < size)
 	{
@@ -41,7 +40,6 @@ void create_threads(pthread_t *threads, int size, void *(*start_routine)(void *)
 	int i;
 	t_routine_data *rdata = (t_routine_data *)routine_data;
 
-	threads = malloc(sizeof(pthread_t) * size);
 	i = 0;
 	while (i < size)
 	{
@@ -76,27 +74,27 @@ void *philosopher_routine(void *routine_data)
 	forks = philo_routine_data->locks;
 
 	// think
-	printf("timestamp_in_ms %d is thinking", *philosopher_number);
+	printf("timestamp_in_ms %d is thinking\n", *philosopher_number);
 
 	// take fork
 	pthread_mutex_lock(&forks[*philosopher_number]);
-	printf("timestamp_in_ms %d has taken a fork", *philosopher_number);
+	printf("timestamp_in_ms %d has taken a fork\n", *philosopher_number);
 	pthread_mutex_lock(&forks[(*philosopher_number + 1) % number_of_philosophers]);
-	printf("timestamp_in_ms %d has taken a fork", *philosopher_number);
+	printf("timestamp_in_ms %d has taken a fork\n", *philosopher_number);
 
 	// eat
-	printf("timestamp_in_ms %d is eating", *philosopher_number);
+	printf("timestamp_in_ms %d is eating\n", *philosopher_number);
 	sleep(3); // use usleep time_to_eat
 
 	// sleep
-	printf("timestamp_in_ms %d is sleeping", *philosopher_number);
+	printf("timestamp_in_ms %d is sleeping\n", *philosopher_number);
 	sleep(3); // use usleep time_to_sleep
 
 	// release forks
 	pthread_mutex_unlock(&forks[*philosopher_number]);
 	pthread_mutex_unlock(&forks[(*philosopher_number + 1) % number_of_philosophers]);
 
-	printf("timestamp_in_ms %d died", *philosopher_number);
+	printf("timestamp_in_ms %d died\n", *philosopher_number);
 
 	return (NULL);
 }
@@ -116,12 +114,18 @@ int	main(int argc, char **argv)
 
 	// print_data(data);
 
-	// create locks for forks (mutex locks)
-	forks = routine_data.locks;
-	create_locks(forks, data.number_of_forks);
+	// malloc threads array for philosophers
+	philosophers = malloc(sizeof(pthread_t) * data.number_of_philosophers);
+
+	// malloc locks array for forks
+	forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
+
+	// create forks locks (mutex locks)
+	init_locks(forks, data.number_of_forks);
 
 	// create philosophers threads
-	philosophers = routine_data.threads;
+	routine_data.threads = philosophers;
+	routine_data.locks = forks;
 	routine_data.number_of_threads = data.number_of_philosophers;
 	create_threads(philosophers, data.number_of_philosophers, philosopher_routine, &routine_data);
 

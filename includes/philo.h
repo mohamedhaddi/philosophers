@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/15 15:07:08 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/15 17:39:34 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,13 @@ typedef	struct	s_data {
 	int time_to_sleep;
 	t_optional_arg number_of_meals;
 }				t_data;
+
+typedef struct	s_routine_data {
+	pthread_t *threads;
+	pthread_mutex_t *locks;
+	int number_of_threads;
+	int	thread_number;
+}				t_routine_data;
 
 int are_valid_args(char **argv, int argc);
 t_data get_data(char **argv, int argc);

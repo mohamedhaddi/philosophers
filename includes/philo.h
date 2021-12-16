@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/16 13:26:19 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/16 15:55:35 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,8 @@ typedef struct	s_routine_data {
 	pthread_t *threads;
 	pthread_mutex_t *locks;
 	int number_of_threads;
-	int	thread_number;
+	int	current_thread_number;
+	pthread_mutex_t lock;
 }				t_routine_data;
 
 int are_valid_args(char **argv, int argc);

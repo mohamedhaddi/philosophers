@@ -6,13 +6,12 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/16 13:41:00 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/16 15:46:55 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 #include <string.h>
-#include <pthread.h>
 
 void print_data(t_data data)
 {
@@ -24,7 +23,7 @@ void print_data(t_data data)
 	printf("%d\n", data.number_of_meals.is_set);
 }
 
-void init_locks(pthread_mutex_t *locks, int size)
+void init_locks(pthread_mutex_t *locks, int size, t_routine_data *routine_data)
 {
 	int i;
 
@@ -34,9 +33,10 @@ void init_locks(pthread_mutex_t *locks, int size)
 		pthread_mutex_init(&locks[i], NULL);
 		i++;
 	}
+	pthread_mutex_init(&routine_data->lock, NULL);
 }
 
-void create_threads(pthread_t *threads, int size, void *(*start_routine)(void *), void *routine_data)
+void create_threads(pthread_t *threads, int size, void *(*start_routine)(void *), t_routine_data *routine_data)
 {
 	int i;
 	t_routine_data *routines_data_arr;
@@ -46,7 +46,7 @@ void create_threads(pthread_t *threads, int size, void *(*start_routine)(void *)
 	while (i < size)
 	{
 		memcpy(&routines_data_arr[i], routine_data, sizeof(t_routine_data)); // to replace with ft_memcpy
-		routines_data_arr[i].thread_number = i;
+		routines_data_arr[i].current_thread_number = i;
 		pthread_create(&threads[i], NULL, start_routine, &routines_data_arr[i]);
 		i++;
 	}
@@ -73,19 +73,27 @@ void *philosopher_routine(void *routine_data)
 
 	philo_routine_data = (t_routine_data *)routine_data;
 	number_of_philosophers = philo_routine_data->number_of_threads;
-	philosopher_number = philo_routine_data->thread_number;
+	philosopher_number = philo_routine_data->current_thread_number;
 	forks = philo_routine_data->locks;
 
-	printf("%d\n", philosopher_number);
-	/*
 	// think
 	printf("timestamp_in_ms %d is thinking\n", philosopher_number);
 
 	// take fork
-	pthread_mutex_lock(&forks[philosopher_number]);
-	printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
-	pthread_mutex_lock(&forks[(philosopher_number + 1) % number_of_philosophers]);
-	printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
+	if (philosopher_number % 2)
+	{
+		pthread_mutex_lock(&forks[(philosopher_number + 1) % number_of_philosophers]);
+		printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
+		pthread_mutex_lock(&forks[philosopher_number]);
+		printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
+	}
+	else
+	{
+		pthread_mutex_lock(&forks[philosopher_number]);
+		printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
+		pthread_mutex_lock(&forks[(philosopher_number + 1) % number_of_philosophers]);
+		printf("timestamp_in_ms %d has taken a fork\n", philosopher_number);
+	}
 
 	// eat
 	printf("timestamp_in_ms %d is eating\n", philosopher_number);
@@ -99,8 +107,7 @@ void *philosopher_routine(void *routine_data)
 	pthread_mutex_unlock(&forks[philosopher_number]);
 	pthread_mutex_unlock(&forks[(philosopher_number + 1) % number_of_philosophers]);
 
-	printf("timestamp_in_ms %d finished eating\n", philosopher_number);
-	*/
+	printf("timestamp_in_ms %d died\n", philosopher_number);
 
 	return (NULL);
 }
@@ -127,7 +134,7 @@ int	main(int argc, char **argv)
 	forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
 
 	// create forks locks (mutex locks)
-	init_locks(forks, data.number_of_forks);
+	init_locks(forks, data.number_of_forks, &philo_routine_data);
 
 	// create philosophers threads
 	philo_routine_data.threads = philosophers;

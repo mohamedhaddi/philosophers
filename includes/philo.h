@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/16 15:55:35 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/17 18:13:15 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,14 @@
 # define PHILO_H
 # define INIT_WITH_ZERO 0
 
+enum STATE { THINKING, EATING, SLEEPING };
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 typedef	struct	s_optional_arg {
 	bool is_set;
@@ -35,13 +38,18 @@ typedef	struct	s_data {
 	t_optional_arg number_of_meals;
 }				t_data;
 
-typedef struct	s_routine_data {
-	pthread_t *threads;
-	pthread_mutex_t *locks;
-	int number_of_threads;
-	int	current_thread_number;
-	pthread_mutex_t lock;
-}				t_routine_data;
+typedef struct	s_locks {
+	pthread_mutex_t *forks;
+}				t_locks;
+
+typedef struct	s_thread_data {
+	t_data input_data;
+	pthread_t thread;
+	t_locks	locks;
+	int	thread_number;
+	int state;
+	size_t start_time;
+}				t_thread_data;
 
 int are_valid_args(char **argv, int argc);
 t_data get_data(char **argv, int argc);

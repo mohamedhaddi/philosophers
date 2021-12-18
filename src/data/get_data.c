@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:22:54 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/12 18:26:50 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/18 17:41:45 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,9 +48,9 @@ t_data get_data(char **argv, int argc)
 	data.time_to_die = ft_atoi(argv[2]);
 	data.time_to_eat = ft_atoi(argv[3]);
 	data.time_to_sleep = ft_atoi(argv[4]);
-	data.number_of_meals.is_set = (argc == 6);
-	data.number_of_meals.value = INIT_WITH_ZERO;
-	if (data.number_of_meals.is_set)
-		data.number_of_meals.value = ft_atoi(argv[5]);
+	data.total_meals.is_set = (argc == 6);
+	data.total_meals.value = INIT_WITH_ZERO;
+	if (data.total_meals.is_set)
+		data.total_meals.value = ft_atoi(argv[5]);
 	return data;
 }

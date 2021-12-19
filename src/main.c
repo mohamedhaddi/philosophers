@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/19 16:03:32 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/19 17:45:40 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,6 +250,7 @@ int	main(int argc, char **argv)
 		pthread_detach(philosophers[i]);
 		i++;
 	}
+	*/
 	i = 0;
 	while (i < data.number_of_forks)
 	{
@@ -260,7 +261,7 @@ int	main(int argc, char **argv)
 	pthread_mutex_destroy(&locks.start_time_lock);
 	pthread_mutex_destroy(&locks.latest_meal_time_lock);
 	pthread_mutex_destroy(&locks.state_lock);
-	*/
+	pthread_mutex_destroy(&locks.total_meals_lock);
 
 	// don't forget to free allocated memory
 

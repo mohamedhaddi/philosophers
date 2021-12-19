@@ -6,7 +6,7 @@
 #    By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/05/21 07:20:17 by mhaddi            #+#    #+#              #
-#    Updated: 2021/12/19 13:24:21 by mhaddi           ###   ########.fr        #
+#    Updated: 2021/12/19 15:35:49 by mhaddi           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ SRCS		=	src/main.c \
 RM			= 	rm -f
 CC			= 	clang
 CFLAGS		= 	-Wall -Wextra -Werror
-DFLAGS		= 	-g -fsanitize=thread
+DFLAGS		= 	-g -fsanitize=address
 
 all:		$(NAME)
 

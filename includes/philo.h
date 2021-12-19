@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/18 18:05:00 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/19 12:42:14 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 # define PHILO_H
 # define INIT_WITH_ZERO 0
 
-enum state { DEAD, EATING, SLEEPING, THINKING };
+enum state { THINKING, READY_TO_EAT, EATING, SLEEPING, DEAD };
 
 #include <stdio.h>
 #include <unistd.h>
@@ -40,10 +40,10 @@ typedef	struct	s_data {
 
 typedef struct	s_locks {
 	pthread_mutex_t *forks;
-	pthread_mutex_t *print_lock;
-	pthread_mutex_t *start_time_lock;
-	pthread_mutex_t *latest_meal_time_lock;
-	pthread_mutex_t *state_lock;
+	pthread_mutex_t print_lock;
+	pthread_mutex_t start_time_lock;
+	pthread_mutex_t latest_meal_time_lock;
+	pthread_mutex_t state_lock;
 }				t_locks;
 
 typedef struct	s_thread_data {
@@ -54,7 +54,6 @@ typedef struct	s_thread_data {
 	size_t start_time;
 	size_t latest_meal_time;
 	int	state;
-	// bool *death;
 }				t_thread_data;
 
 int are_valid_args(char **argv, int argc);

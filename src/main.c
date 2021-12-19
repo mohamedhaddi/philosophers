@@ -102,11 +102,11 @@ void *philosopher_routine(void *thread_data)
 		// pick forks
 		pthread_mutex_lock(&forks_locks[philosopher_number]);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
-		printf("%zu %d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
+		printf("%zu	%d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
 		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 		pthread_mutex_lock(&forks_locks[(philosopher_number + 1) % number_of_philosophers]);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
-		printf("%zu %d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
+		printf("%zu	%d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
 		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 
 		// eat
@@ -120,7 +120,7 @@ void *philosopher_routine(void *thread_data)
 		philosopher_data->state = EATING;
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
-		printf("%zu %d is eating\n", get_time() - start_time, philosopher_number + 1);
+		printf("%zu	%d is eating\n", get_time() - start_time, philosopher_number + 1);
 		// decrement total meals
 		pthread_mutex_lock(&philosopher_data->locks.total_meals_lock);
 		if (philosopher_data->total_meals.is_set)
@@ -138,7 +138,7 @@ void *philosopher_routine(void *thread_data)
 		philosopher_data->state = SLEEPING;
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
-		printf("%zu %d is sleeping\n", get_time() - start_time, philosopher_number + 1);
+		printf("%zu	%d is sleeping\n", get_time() - start_time, philosopher_number + 1);
 		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 		ft_usleep(philosopher_data->input_data.time_to_sleep);
 
@@ -147,7 +147,7 @@ void *philosopher_routine(void *thread_data)
 		philosopher_data->state = THINKING;
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
-		printf("%zu %d is thinking\n", get_time() - start_time, philosopher_number + 1);
+		printf("%zu	%d is thinking\n", get_time() - start_time, philosopher_number + 1);
 		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 	}
 
@@ -220,7 +220,7 @@ int	main(int argc, char **argv)
 		{
 			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock); // may not need this lock thanks to the delay
 			pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
-			printf("%zu %d died\n", get_time() - philosophers_data[i].start_time, i + 1);
+			printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
 			break ;
 		}
 		pthread_mutex_unlock(&philosophers_data[i].locks.state_lock);

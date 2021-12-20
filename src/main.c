@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/20 12:52:10 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/20 13:01:18 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,8 +206,8 @@ int	main(int argc, char **argv)
 
 	/* death listener */
 
-	// add delay until all philosophers start (time_to_eat)
-	ft_usleep(data.time_to_eat);
+	// add delay until all philosophers start
+	ft_usleep(5);
 	bool *philosophers_satiated = malloc(sizeof(bool) * data.number_of_philosophers);
 	memset(philosophers_satiated, false, sizeof(bool) * data.number_of_philosophers);
 	i = 0;
@@ -219,7 +219,7 @@ int	main(int argc, char **argv)
 		if ((philosophers_data[i].state != READY_TO_EAT
 			&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
 		{
-			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock); // may not need this lock thanks to the delay
+			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock);
 			printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
 			break ;
 		}

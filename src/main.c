@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/20 13:24:03 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/20 18:18:48 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,13 +111,12 @@ void *philosopher_routine(void *thread_data)
 
 		// eat
 		pthread_mutex_lock(&philosopher_data->locks.state_lock);
-		philosopher_data->state = READY_TO_EAT;
+		philosopher_data->state = EATING;
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.latest_meal_time_lock);
 		philosopher_data->latest_meal_time = get_time();
 		pthread_mutex_unlock(&philosopher_data->locks.latest_meal_time_lock);
 		pthread_mutex_lock(&philosopher_data->locks.state_lock);
-		philosopher_data->state = EATING;
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
 		printf("%zu	%d is eating\n", get_time() - start_time, philosopher_number + 1);
@@ -220,7 +219,7 @@ int	main(int argc, char **argv)
 		pthread_mutex_lock(&philosophers_data[i].locks.state_lock);
 		pthread_mutex_lock(&philosophers_data[i].locks.latest_meal_time_lock);
 		pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
-		if ((philosophers_data[i].state != READY_TO_EAT
+		if ((philosophers_data[i].state != EATING
 			&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
 		{
 			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock);

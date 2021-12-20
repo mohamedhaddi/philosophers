@@ -162,8 +162,8 @@ int	main(int argc, char **argv)
 	t_locks locks;
 
 	// check input
-    if (!are_valid_args(argv, argc))
-        return (EXIT_FAILURE);
+	if (!are_valid_args(argv, argc))
+		return (EXIT_FAILURE);
 	data = get_data(argv, argc);
 	if (!is_valid_data(data))
 		return (EXIT_FAILURE);

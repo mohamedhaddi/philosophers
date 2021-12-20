@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/20 11:05:58 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/20 12:52:10 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void	ft_usleep(size_t time_in_ms)
 	start_time = 0;
 	start_time = get_time();
 	while ((get_time() - start_time) < time_in_ms)
-		usleep(time_in_ms / 10);
+		usleep(600);
 }
 
 void *philosopher_routine(void *thread_data)
@@ -215,14 +215,15 @@ int	main(int argc, char **argv)
 	{
 		pthread_mutex_lock(&philosophers_data[i].locks.state_lock);
 		pthread_mutex_lock(&philosophers_data[i].locks.latest_meal_time_lock);
+		pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
 		if ((philosophers_data[i].state != READY_TO_EAT
 			&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
 		{
 			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock); // may not need this lock thanks to the delay
-			pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
 			printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
 			break ;
 		}
+		pthread_mutex_unlock(&philosophers_data[i].locks.print_lock);
 		pthread_mutex_unlock(&philosophers_data[i].locks.state_lock);
 		pthread_mutex_unlock(&philosophers_data[i].locks.latest_meal_time_lock);
 
@@ -237,7 +238,7 @@ int	main(int argc, char **argv)
 			}
 			pthread_mutex_unlock(&philosophers_data[i].locks.total_meals_lock);
 		}
-		ft_usleep(100);
+		ft_usleep(1);
 		i = (i + 1) % data.number_of_philosophers;
 	}
 

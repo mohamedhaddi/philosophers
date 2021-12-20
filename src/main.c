@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/20 13:01:18 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/20 13:24:03 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,13 +206,17 @@ int	main(int argc, char **argv)
 
 	/* death listener */
 
-	// add delay until all philosophers start
+	// add a small delay to guarantee all philosophers started
 	ft_usleep(5);
+
+	// an array that stores whether all philosophers are satiated (ate are their meals)
 	bool *philosophers_satiated = malloc(sizeof(bool) * data.number_of_philosophers);
 	memset(philosophers_satiated, false, sizeof(bool) * data.number_of_philosophers);
+
 	i = 0;
 	while (1)
 	{
+		// check if a philosopher has died
 		pthread_mutex_lock(&philosophers_data[i].locks.state_lock);
 		pthread_mutex_lock(&philosophers_data[i].locks.latest_meal_time_lock);
 		pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
@@ -227,6 +231,7 @@ int	main(int argc, char **argv)
 		pthread_mutex_unlock(&philosophers_data[i].locks.state_lock);
 		pthread_mutex_unlock(&philosophers_data[i].locks.latest_meal_time_lock);
 
+		// check if all philosophers are satiated (ate all their meals)
 		if (data.total_meals.is_set)
 		{
 			pthread_mutex_lock(&philosophers_data[i].locks.total_meals_lock);
@@ -238,20 +243,17 @@ int	main(int argc, char **argv)
 			}
 			pthread_mutex_unlock(&philosophers_data[i].locks.total_meals_lock);
 		}
+
+		// a little delay to slow down the infinite loop
 		ft_usleep(1);
+
 		i = (i + 1) % data.number_of_philosophers;
 	}
 
 	/* free all */
 
-	/*
-	i = 0;
-	while (i < data.number_of_philosophers)
-	{
-		pthread_detach(philosophers[i]);
-		i++;
-	}
-	*/
+	// TO-DO: free allocated memory
+
 	i = 0;
 	while (i < data.number_of_forks)
 	{
@@ -263,8 +265,6 @@ int	main(int argc, char **argv)
 	pthread_mutex_destroy(&locks.latest_meal_time_lock);
 	pthread_mutex_destroy(&locks.state_lock);
 	pthread_mutex_destroy(&locks.total_meals_lock);
-
-	// don't forget to free allocated memory
 
 	return (EXIT_SUCCESS);
 }

@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/19 17:45:40 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/20 11:05:58 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,12 +121,12 @@ void *philosopher_routine(void *thread_data)
 		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
 		pthread_mutex_lock(&philosopher_data->locks.print_lock);
 		printf("%zu	%d is eating\n", get_time() - start_time, philosopher_number + 1);
+		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 		// decrement total meals
 		pthread_mutex_lock(&philosopher_data->locks.total_meals_lock);
 		if (philosopher_data->total_meals.is_set)
 			philosopher_data->total_meals.value--;
 		pthread_mutex_unlock(&philosopher_data->locks.total_meals_lock);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
 		ft_usleep(philosopher_data->input_data.time_to_eat);
 
 		// release forks
@@ -237,7 +237,7 @@ int	main(int argc, char **argv)
 			}
 			pthread_mutex_unlock(&philosophers_data[i].locks.total_meals_lock);
 		}
-
+		ft_usleep(100);
 		i = (i + 1) % data.number_of_philosophers;
 	}
 

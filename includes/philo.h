@@ -23,6 +23,7 @@ enum state { THINKING, READY_TO_EAT, EATING, SLEEPING, DEAD };
 #include <stdbool.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <string.h>
 
 typedef	struct	s_optional_arg {
 	bool is_set;

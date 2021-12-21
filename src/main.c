@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/21 18:23:37 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/21 22:48:37 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,20 +43,6 @@ void	ft_usleep(size_t time_in_ms)
 	usleep((time_in_ms - 10) * 1000);
 	while ((get_time() - time_in_ms) < start_time)
 		;
-}
-
-size_t	get_thread_start_time(t_thread_data *philosopher_data)
-{
-	size_t start_time;
-
-	pthread_mutex_lock(&philosopher_data->locks->start_time_lock);
-	pthread_mutex_lock(&philosopher_data->locks->latest_meal_time_lock);
-	philosopher_data->start_time = get_time();
-	start_time = philosopher_data->start_time;
-	philosopher_data->latest_meal_time = start_time;
-	pthread_mutex_unlock(&philosopher_data->locks->latest_meal_time_lock);
-	pthread_mutex_unlock(&philosopher_data->locks->start_time_lock);
-	return (start_time);
 }
 
 void	pick_forks(pthread_mutex_t *forks_locks, t_thread_data *philosopher_data, size_t start_time)
@@ -124,7 +110,7 @@ void	take_a_nap(t_thread_data *philosopher_data, size_t start_time)
 	ft_usleep(philosopher_data->input_data.time_to_sleep);
 }
 
-void	think(t_thread_data *philosopher_data, int start_time)
+void	think(t_thread_data *philosopher_data, size_t start_time)
 {
 	int philosopher_number;
 
@@ -137,6 +123,16 @@ void	think(t_thread_data *philosopher_data, int start_time)
 	pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 }
 
+void	set_thread_start_time(t_thread_data *philosopher_data)
+{
+	pthread_mutex_lock(&philosopher_data->locks->start_time_lock);
+	pthread_mutex_lock(&philosopher_data->locks->latest_meal_time_lock);
+	philosopher_data->start_time = get_time();
+	philosopher_data->latest_meal_time = philosopher_data->start_time;
+	pthread_mutex_unlock(&philosopher_data->locks->latest_meal_time_lock);
+	pthread_mutex_unlock(&philosopher_data->locks->start_time_lock);
+}
+
 void *philosopher_routine(void *thread_data)
 {
 	t_thread_data *philosopher_data;
@@ -144,9 +140,10 @@ void *philosopher_routine(void *thread_data)
 	pthread_mutex_t *forks_locks;
 
 	philosopher_data = (t_thread_data *)thread_data;
-	start_time = get_thread_start_time(philosopher_data);
+	set_thread_start_time(philosopher_data);
+	start_time = philosopher_data->start_time;
 	forks_locks = philosopher_data->locks->forks;
-	if (philosopher_data->thread_number)
+	if (philosopher_data->thread_number % 2)
 		ft_usleep(philosopher_data->input_data.time_to_eat);
 	while (1)
 	{
@@ -159,69 +156,6 @@ void *philosopher_routine(void *thread_data)
 	return (NULL);
 }
 
-t_locks	init_locks(t_data data)
-{
-	t_locks locks;
-	int i;
-
-	locks.forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
-	i = 0;
-	while (i < data.number_of_forks)
-	{
-		pthread_mutex_init(&locks.forks[i], NULL);
-		i++;
-	}
-	pthread_mutex_init(&locks.print_lock, NULL);
-	pthread_mutex_init(&locks.start_time_lock, NULL);
-	pthread_mutex_init(&locks.latest_meal_time_lock, NULL);
-	pthread_mutex_init(&locks.state_lock, NULL);
-	pthread_mutex_init(&locks.total_meals_lock, NULL);
-	return (locks);
-}
-
-t_thread_data *create_philosophers(t_data data, t_locks *locks)
-{
-	t_thread_data *philosophers_data;
-	pthread_t *philosophers;
-	int i;
-
-	philosophers = malloc(sizeof(pthread_t) * data.number_of_philosophers);
-	i = 0;
-	philosophers_data = malloc(sizeof(t_thread_data) * data.number_of_philosophers);
-	while (i < data.number_of_philosophers)
-	{
-		philosophers_data[i].thread = philosophers[i];
-		philosophers_data[i].total_meals = data.total_meals;
-		philosophers_data[i].locks = locks;
-		philosophers_data[i].input_data = data;
-		philosophers_data[i].thread_number = i;
-		philosophers_data[i].state = THINKING;
-		philosophers_data[i].start_time = INIT_WITH_ZERO;
-		philosophers_data[i].latest_meal_time = INIT_WITH_ZERO;
-		pthread_create(&philosophers[i], NULL, philosopher_routine, &philosophers_data[i]);
-		i++;
-	}
-	return (philosophers_data);
-}
-
-bool	a_philosopher_died(int i, t_thread_data *philosophers_data, t_data data)
-{
-	pthread_mutex_lock(&philosophers_data[i].locks->state_lock);
-	pthread_mutex_lock(&philosophers_data[i].locks->latest_meal_time_lock);
-	pthread_mutex_lock(&philosophers_data[i].locks->print_lock);
-	if ((philosophers_data[i].state != EATING
-				&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
-	{
-		pthread_mutex_lock(&philosophers_data[i].locks->start_time_lock);
-		printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
-		return (true);
-	}
-	pthread_mutex_unlock(&philosophers_data[i].locks->print_lock);
-	pthread_mutex_unlock(&philosophers_data[i].locks->state_lock);
-	pthread_mutex_unlock(&philosophers_data[i].locks->latest_meal_time_lock);
-	return (false);
-}
-
 bool	all_philosophers_satiated(int i, bool *philosophers_satiated, t_thread_data *philosophers_data, t_data data)
 {
 	pthread_mutex_lock(&philosophers_data[i].locks->total_meals_lock);
@@ -232,6 +166,24 @@ bool	all_philosophers_satiated(int i, bool *philosophers_satiated, t_thread_data
 			return (true);
 	}
 	pthread_mutex_unlock(&philosophers_data[i].locks->total_meals_lock);
+	return (false);
+}
+
+bool	a_philosopher_died(int i, t_thread_data *philosophers_data, t_data data)
+{
+	pthread_mutex_lock(&philosophers_data[i].locks->state_lock);
+	pthread_mutex_lock(&philosophers_data[i].locks->latest_meal_time_lock);
+	pthread_mutex_lock(&philosophers_data[i].locks->print_lock);
+	if ((philosophers_data[i].state != EATING
+		&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
+	{
+		pthread_mutex_lock(&philosophers_data[i].locks->start_time_lock);
+		printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
+		return (true);
+	}
+	pthread_mutex_unlock(&philosophers_data[i].locks->print_lock);
+	pthread_mutex_unlock(&philosophers_data[i].locks->state_lock);
+	pthread_mutex_unlock(&philosophers_data[i].locks->latest_meal_time_lock);
 	return (false);
 }
 
@@ -271,6 +223,51 @@ void destroy_mutexes(t_locks *locks, t_data data)
 	pthread_mutex_destroy(&locks->latest_meal_time_lock);
 	pthread_mutex_destroy(&locks->state_lock);
 	pthread_mutex_destroy(&locks->total_meals_lock);
+}
+
+t_thread_data *create_philosophers(t_data data, t_locks *locks)
+{
+	pthread_t *philosophers;
+	t_thread_data *philosophers_data;
+	int i;
+
+	philosophers = malloc(sizeof(pthread_t) * data.number_of_philosophers);
+	philosophers_data = malloc(sizeof(t_thread_data) * data.number_of_philosophers);
+	i = 0;
+	while (i < data.number_of_philosophers)
+	{
+		philosophers_data[i].thread = philosophers[i];
+		philosophers_data[i].total_meals = data.total_meals;
+		philosophers_data[i].locks = locks;
+		philosophers_data[i].input_data = data;
+		philosophers_data[i].thread_number = i;
+		philosophers_data[i].state = THINKING;
+		philosophers_data[i].start_time = INIT_WITH_ZERO;
+		philosophers_data[i].latest_meal_time = INIT_WITH_ZERO;
+		pthread_create(&philosophers[i], NULL, philosopher_routine, &philosophers_data[i]);
+		i++;
+	}
+	return (philosophers_data);
+}
+
+t_locks	init_locks(t_data data)
+{
+	t_locks locks;
+	int i;
+
+	locks.forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
+	i = 0;
+	while (i < data.number_of_forks)
+	{
+		pthread_mutex_init(&locks.forks[i], NULL);
+		i++;
+	}
+	pthread_mutex_init(&locks.print_lock, NULL);
+	pthread_mutex_init(&locks.start_time_lock, NULL);
+	pthread_mutex_init(&locks.latest_meal_time_lock, NULL);
+	pthread_mutex_init(&locks.state_lock, NULL);
+	pthread_mutex_init(&locks.total_meals_lock, NULL);
+	return (locks);
 }
 
 int	main(int argc, char **argv)

@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/21 22:48:37 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/21 23:19:37 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,12 +187,14 @@ bool	a_philosopher_died(int i, t_thread_data *philosophers_data, t_data data)
 	return (false);
 }
 
-void	supervise(t_data data, t_thread_data *philosophers_data)
+bool	*supervise(t_data data, t_thread_data *philosophers_data)
 {
 	bool *philosophers_satiated;
 	int i;
 
 	philosophers_satiated = malloc(sizeof(bool) * data.number_of_philosophers);
+	if (!philosophers_satiated)
+		return (NULL);
 	memset(philosophers_satiated, false, sizeof(bool) * data.number_of_philosophers);
 	ft_usleep(20);
 	i = 0;
@@ -206,6 +208,7 @@ void	supervise(t_data data, t_thread_data *philosophers_data)
 		i = (i + 1) % data.number_of_philosophers;
 		usleep(200);
 	}
+	return (philosophers_satiated);
 }
 
 void destroy_mutexes(t_locks *locks, t_data data)
@@ -233,6 +236,8 @@ t_thread_data *create_philosophers(t_data data, t_locks *locks)
 
 	philosophers = malloc(sizeof(pthread_t) * data.number_of_philosophers);
 	philosophers_data = malloc(sizeof(t_thread_data) * data.number_of_philosophers);
+	if (!philosophers || !philosophers_data)
+		return (NULL);
 	i = 0;
 	while (i < data.number_of_philosophers)
 	{
@@ -244,48 +249,70 @@ t_thread_data *create_philosophers(t_data data, t_locks *locks)
 		philosophers_data[i].state = THINKING;
 		philosophers_data[i].start_time = INIT_WITH_ZERO;
 		philosophers_data[i].latest_meal_time = INIT_WITH_ZERO;
-		pthread_create(&philosophers[i], NULL, philosopher_routine, &philosophers_data[i]);
+		if (pthread_create(&philosophers[i], NULL, philosopher_routine, &philosophers_data[i]))
+			return (NULL);
 		i++;
 	}
 	return (philosophers_data);
 }
 
-t_locks	init_locks(t_data data)
+t_locks	*init_locks(t_data data)
 {
-	t_locks locks;
+	t_locks *locks;
 	int i;
 
-	locks.forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
+	locks = malloc(sizeof(t_locks));
+	if (!locks)
+		return (NULL);
+	locks->forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
+	if (!locks->forks)
+		return (NULL);
 	i = 0;
 	while (i < data.number_of_forks)
 	{
-		pthread_mutex_init(&locks.forks[i], NULL);
+		if (pthread_mutex_init(&locks->forks[i], NULL))
+			return (NULL);
 		i++;
 	}
-	pthread_mutex_init(&locks.print_lock, NULL);
-	pthread_mutex_init(&locks.start_time_lock, NULL);
-	pthread_mutex_init(&locks.latest_meal_time_lock, NULL);
-	pthread_mutex_init(&locks.state_lock, NULL);
-	pthread_mutex_init(&locks.total_meals_lock, NULL);
+	if (pthread_mutex_init(&locks->print_lock, NULL)
+	|| pthread_mutex_init(&locks->start_time_lock, NULL)
+	|| pthread_mutex_init(&locks->latest_meal_time_lock, NULL)
+	|| pthread_mutex_init(&locks->state_lock, NULL)
+	|| pthread_mutex_init(&locks->total_meals_lock, NULL))
+		return (NULL);
 	return (locks);
+}
+
+int panic(char *error_message)
+{
+	printf("%s\n", error_message);
+	return (EXIT_FAILURE);
 }
 
 int	main(int argc, char **argv)
 {
 	t_data data;
 	t_thread_data *philosophers_data;
-	t_locks locks;
+	t_locks *locks;
 
 	if (!are_valid_args(argv, argc))
-		return (EXIT_FAILURE);
+		return (panic("Invalid arguments."));
 	data = get_data(argv, argc);
 	if (!is_valid_data(data))
-		return (EXIT_FAILURE);
+		return (panic("Invalid data."));
 
 	locks = init_locks(data);
-	philosophers_data = create_philosophers(data, &locks);
-	supervise(data, philosophers_data);
-	destroy_mutexes(&locks, data);
+	if (!locks)
+		return (panic("Locks initialization failed."));
+
+	philosophers_data = create_philosophers(data, locks);
+	if (!philosophers_data)
+		return (panic("Threads creation failed."));
+
+	if (!supervise(data, philosophers_data))
+		return (panic("Failed to malloc philosophers_satiated array."));
+
+	destroy_mutexes(locks, data);
 
 	// TO-DO: free allocated memory
 

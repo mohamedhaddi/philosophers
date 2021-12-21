@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/21 01:35:31 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/21 02:21:23 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,10 @@ void	ft_usleep(size_t time_in_ms)
 {
 	size_t start_time;
 
-	start_time = 0;
 	start_time = get_time();
-	while ((get_time() - start_time) < time_in_ms)
-		usleep(600);
+	usleep((time_in_ms - 10) * 1000);
+	while ((get_time() - time_in_ms) < start_time)
+		;
 }
 
 void *philosopher_routine(void *thread_data)
@@ -205,12 +205,12 @@ int	main(int argc, char **argv)
 
 	/* death listener */
 
-	// add a small delay to guarantee all philosophers started
-	ft_usleep(5);
-
 	// an array that stores whether all philosophers are satiated (ate are their meals)
 	bool *philosophers_satiated = malloc(sizeof(bool) * data.number_of_philosophers);
 	memset(philosophers_satiated, false, sizeof(bool) * data.number_of_philosophers);
+
+	// wait a bit 'til it's guaranteed that all philosophers started
+	ft_usleep(20);
 
 	i = 0;
 	while (1)
@@ -242,11 +242,10 @@ int	main(int argc, char **argv)
 			}
 			pthread_mutex_unlock(&philosophers_data[i].locks->total_meals_lock);
 		}
+		i = (i + 1) % data.number_of_philosophers;
 
 		// a little delay to slow down the infinite loop
-		ft_usleep(1);
-
-		i = (i + 1) % data.number_of_philosophers;
+		usleep(200);
 	}
 
 	/* free all */

@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/20 18:18:48 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/21 01:35:31 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,17 +82,17 @@ void *philosopher_routine(void *thread_data)
 	philosopher_data = (t_thread_data *)thread_data;
 	number_of_philosophers = philosopher_data->input_data.number_of_philosophers;
 	philosopher_number = philosopher_data->thread_number;
-	forks_locks = philosopher_data->locks.forks;
+	forks_locks = philosopher_data->locks->forks;
 	time_to_die = philosopher_data->input_data.time_to_die;
 
 	// get starting time:
-	pthread_mutex_lock(&philosopher_data->locks.start_time_lock);
-	pthread_mutex_lock(&philosopher_data->locks.latest_meal_time_lock);
+	pthread_mutex_lock(&philosopher_data->locks->start_time_lock);
+	pthread_mutex_lock(&philosopher_data->locks->latest_meal_time_lock);
 	philosopher_data->start_time = get_time();
 	start_time = philosopher_data->start_time;
 	philosopher_data->latest_meal_time = start_time;
-	pthread_mutex_unlock(&philosopher_data->locks.latest_meal_time_lock);
-	pthread_mutex_unlock(&philosopher_data->locks.start_time_lock);
+	pthread_mutex_unlock(&philosopher_data->locks->latest_meal_time_lock);
+	pthread_mutex_unlock(&philosopher_data->locks->start_time_lock);
 
 	if (philosopher_number % 2)
 		ft_usleep(philosopher_data->input_data.time_to_eat);
@@ -101,31 +101,31 @@ void *philosopher_routine(void *thread_data)
 	{
 		// pick forks
 		pthread_mutex_lock(&forks_locks[philosopher_number]);
-		pthread_mutex_lock(&philosopher_data->locks.print_lock);
+		pthread_mutex_lock(&philosopher_data->locks->print_lock);
 		printf("%zu	%d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 		pthread_mutex_lock(&forks_locks[(philosopher_number + 1) % number_of_philosophers]);
-		pthread_mutex_lock(&philosopher_data->locks.print_lock);
+		pthread_mutex_lock(&philosopher_data->locks->print_lock);
 		printf("%zu	%d has taken a fork\n", get_time() - start_time, philosopher_number + 1);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 
 		// eat
-		pthread_mutex_lock(&philosopher_data->locks.state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->state_lock);
 		philosopher_data->state = EATING;
-		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
-		pthread_mutex_lock(&philosopher_data->locks.latest_meal_time_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->latest_meal_time_lock);
 		philosopher_data->latest_meal_time = get_time();
-		pthread_mutex_unlock(&philosopher_data->locks.latest_meal_time_lock);
-		pthread_mutex_lock(&philosopher_data->locks.state_lock);
-		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
-		pthread_mutex_lock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->latest_meal_time_lock);
+		pthread_mutex_lock(&philosopher_data->locks->state_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->print_lock);
 		printf("%zu	%d is eating\n", get_time() - start_time, philosopher_number + 1);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 		// decrement total meals
-		pthread_mutex_lock(&philosopher_data->locks.total_meals_lock);
+		pthread_mutex_lock(&philosopher_data->locks->total_meals_lock);
 		if (philosopher_data->total_meals.is_set)
 			philosopher_data->total_meals.value--;
-		pthread_mutex_unlock(&philosopher_data->locks.total_meals_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->total_meals_lock);
 		ft_usleep(philosopher_data->input_data.time_to_eat);
 
 		// release forks
@@ -133,21 +133,21 @@ void *philosopher_routine(void *thread_data)
 		pthread_mutex_unlock(&forks_locks[(philosopher_number + 1) % number_of_philosophers]);
 
 		// sleep
-		pthread_mutex_lock(&philosopher_data->locks.state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->state_lock);
 		philosopher_data->state = SLEEPING;
-		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
-		pthread_mutex_lock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->print_lock);
 		printf("%zu	%d is sleeping\n", get_time() - start_time, philosopher_number + 1);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 		ft_usleep(philosopher_data->input_data.time_to_sleep);
 
 		// think
-		pthread_mutex_lock(&philosopher_data->locks.state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->state_lock);
 		philosopher_data->state = THINKING;
-		pthread_mutex_unlock(&philosopher_data->locks.state_lock);
-		pthread_mutex_lock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->state_lock);
+		pthread_mutex_lock(&philosopher_data->locks->print_lock);
 		printf("%zu	%d is thinking\n", get_time() - start_time, philosopher_number + 1);
-		pthread_mutex_unlock(&philosopher_data->locks.print_lock);
+		pthread_mutex_unlock(&philosopher_data->locks->print_lock);
 	}
 
 	return (NULL);
@@ -193,7 +193,7 @@ int	main(int argc, char **argv)
 	{
 		philosophers_data[i].thread = philosophers[i];
 		philosophers_data[i].total_meals = data.total_meals;
-		philosophers_data[i].locks = locks;
+		philosophers_data[i].locks = &locks;
 		philosophers_data[i].input_data = data;
 		philosophers_data[i].thread_number = i;
 		philosophers_data[i].state = THINKING;
@@ -216,31 +216,31 @@ int	main(int argc, char **argv)
 	while (1)
 	{
 		// check if a philosopher has died
-		pthread_mutex_lock(&philosophers_data[i].locks.state_lock);
-		pthread_mutex_lock(&philosophers_data[i].locks.latest_meal_time_lock);
-		pthread_mutex_lock(&philosophers_data[i].locks.print_lock);
+		pthread_mutex_lock(&philosophers_data[i].locks->state_lock);
+		pthread_mutex_lock(&philosophers_data[i].locks->latest_meal_time_lock);
+		pthread_mutex_lock(&philosophers_data[i].locks->print_lock);
 		if ((philosophers_data[i].state != EATING
 			&& (get_time() - philosophers_data[i].latest_meal_time) >= (size_t)data.time_to_die))
 		{
-			pthread_mutex_lock(&philosophers_data[i].locks.start_time_lock);
+			pthread_mutex_lock(&philosophers_data[i].locks->start_time_lock);
 			printf("%zu	%d died\n", get_time() - philosophers_data[i].start_time, i + 1);
 			break ;
 		}
-		pthread_mutex_unlock(&philosophers_data[i].locks.print_lock);
-		pthread_mutex_unlock(&philosophers_data[i].locks.state_lock);
-		pthread_mutex_unlock(&philosophers_data[i].locks.latest_meal_time_lock);
+		pthread_mutex_unlock(&philosophers_data[i].locks->print_lock);
+		pthread_mutex_unlock(&philosophers_data[i].locks->state_lock);
+		pthread_mutex_unlock(&philosophers_data[i].locks->latest_meal_time_lock);
 
 		// check if all philosophers are satiated (ate all their meals)
 		if (data.total_meals.is_set)
 		{
-			pthread_mutex_lock(&philosophers_data[i].locks.total_meals_lock);
+			pthread_mutex_lock(&philosophers_data[i].locks->total_meals_lock);
 			if (philosophers_data[i].total_meals.value == 0)
 			{
 				philosophers_satiated[i] = true;
 				if (all(philosophers_satiated, data.number_of_philosophers))
 					break ;
 			}
-			pthread_mutex_unlock(&philosophers_data[i].locks.total_meals_lock);
+			pthread_mutex_unlock(&philosophers_data[i].locks->total_meals_lock);
 		}
 
 		// a little delay to slow down the infinite loop

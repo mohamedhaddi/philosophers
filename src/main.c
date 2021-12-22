@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/21 23:19:37 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 12:35:31 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,12 @@ bool	a_philosopher_died(int i, t_thread_data *philosophers_data, t_data data)
 	return (false);
 }
 
+void *panic(char *error_message)
+{
+	printf("%s\n", error_message);
+	return (NULL);
+}
+
 bool	*supervise(t_data data, t_thread_data *philosophers_data)
 {
 	bool *philosophers_satiated;
@@ -194,7 +200,7 @@ bool	*supervise(t_data data, t_thread_data *philosophers_data)
 
 	philosophers_satiated = malloc(sizeof(bool) * data.number_of_philosophers);
 	if (!philosophers_satiated)
-		return (NULL);
+		return (panic("Failed to malloc philosophers_satiated array."));
 	memset(philosophers_satiated, false, sizeof(bool) * data.number_of_philosophers);
 	ft_usleep(20);
 	i = 0;
@@ -228,16 +234,10 @@ void destroy_mutexes(t_locks *locks, t_data data)
 	pthread_mutex_destroy(&locks->total_meals_lock);
 }
 
-t_thread_data *create_philosophers(t_data data, t_locks *locks)
+void *create_threads(pthread_t *philosophers, t_thread_data *philosophers_data, t_data data, t_locks *locks)
 {
-	pthread_t *philosophers;
-	t_thread_data *philosophers_data;
 	int i;
 
-	philosophers = malloc(sizeof(pthread_t) * data.number_of_philosophers);
-	philosophers_data = malloc(sizeof(t_thread_data) * data.number_of_philosophers);
-	if (!philosophers || !philosophers_data)
-		return (NULL);
 	i = 0;
 	while (i < data.number_of_philosophers)
 	{
@@ -253,20 +253,13 @@ t_thread_data *create_philosophers(t_data data, t_locks *locks)
 			return (NULL);
 		i++;
 	}
-	return (philosophers_data);
+	return (philosophers);
 }
 
-t_locks	*init_locks(t_data data)
+t_locks	*init_locks(t_locks *locks, t_data data)
 {
-	t_locks *locks;
 	int i;
 
-	locks = malloc(sizeof(t_locks));
-	if (!locks)
-		return (NULL);
-	locks->forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
-	if (!locks->forks)
-		return (NULL);
 	i = 0;
 	while (i < data.number_of_forks)
 	{
@@ -283,38 +276,70 @@ t_locks	*init_locks(t_data data)
 	return (locks);
 }
 
-int panic(char *error_message)
+void	free_allocated_memory(t_locks *locks, t_threads *philosophers, bool *philosophers_satiated, t_data *data)
 {
-	printf("%s\n", error_message);
-	return (EXIT_FAILURE);
+	free(data);
+	free(locks->forks);
+	free(locks);
+	free(philosophers->threads);
+	free(philosophers->threads_data);
+	free(philosophers);
+	free(philosophers_satiated);
+}
+
+t_locks *create_locks(t_data data)
+{
+	t_locks *locks;
+
+	locks = malloc(sizeof(t_locks));
+	if (!locks)
+		return (panic("Failed to malloc locks."));
+	locks->forks = malloc(sizeof(pthread_mutex_t) * data.number_of_forks);
+	if (!locks->forks)
+		return (panic("Failed to malloc forks."));
+	if (!init_locks(locks, data))
+		return (panic("Locks initialization failed."));
+	return (locks);
+}
+
+t_threads *create_philosophers(t_locks *locks, t_data data)
+{
+	t_threads *philosophers;
+
+	philosophers = malloc(sizeof(t_threads));
+	if (!philosophers)
+		return (panic("Failed to malloc for philosophers."));
+	philosophers->threads = malloc(sizeof(pthread_t) * data.number_of_philosophers);
+	if (!philosophers->threads)
+		return (panic("Failed to malloc for philosophers' threads."));
+	philosophers->threads_data = malloc(sizeof(t_thread_data) * data.number_of_philosophers);
+	if (!philosophers->threads_data)
+		return (panic("Failed to malloc for philosophers' data."));
+	if (!create_threads(philosophers->threads, philosophers->threads_data, data, locks))
+		return (panic("Threads creation failed."));
+	return (philosophers);
 }
 
 int	main(int argc, char **argv)
 {
-	t_data data;
-	t_thread_data *philosophers_data;
+	t_data *data;
+	t_threads *philosophers;
+	bool *philosophers_satiated;
 	t_locks *locks;
 
-	if (!are_valid_args(argv, argc))
-		return (panic("Invalid arguments."));
-	data = get_data(argv, argc);
-	if (!is_valid_data(data))
-		return (panic("Invalid data."));
-
-	locks = init_locks(data);
+	data = get_data(argc, argv);
+	if (!data)
+		return (EXIT_FAILURE);
+	locks = create_locks(*data);
 	if (!locks)
-		return (panic("Locks initialization failed."));
-
-	philosophers_data = create_philosophers(data, locks);
-	if (!philosophers_data)
-		return (panic("Threads creation failed."));
-
-	if (!supervise(data, philosophers_data))
-		return (panic("Failed to malloc philosophers_satiated array."));
-
-	destroy_mutexes(locks, data);
-
-	// TO-DO: free allocated memory
-
+		return (EXIT_FAILURE);
+	philosophers = create_philosophers(locks, *data);
+	if (!philosophers)
+		return (EXIT_FAILURE);
+	philosophers_satiated = supervise(*data, philosophers->threads_data);
+	if (!philosophers_satiated)
+		return (EXIT_FAILURE);
+	destroy_mutexes(locks, *data);
+	free_allocated_memory(locks, philosophers, philosophers_satiated, data);
 	return (EXIT_SUCCESS);
 }

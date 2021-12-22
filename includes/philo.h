@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/21 22:08:03 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 12:29:13 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,15 @@ typedef struct	s_thread_data {
 	int	state;
 }				t_thread_data;
 
+typedef struct	s_threads {
+	pthread_t *threads;	
+	t_thread_data *threads_data;
+}				t_threads;
+
 int are_valid_args(char **argv, int argc);
-t_data get_data(char **argv, int argc);
+t_data *get_data(int argc, char **argv);
+t_data get_input(char **argv, int argc);
 bool is_valid_data(t_data data);
+void *panic(char *error_message);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:22:54 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/18 17:41:45 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 12:34:56 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ int ft_atoi(const char *str)
     return (res * temp);
 }
 
-t_data get_data(char **argv, int argc)
+t_data get_input(char **argv, int argc)
 {
 	t_data data;
 
@@ -53,4 +53,17 @@ t_data get_data(char **argv, int argc)
 	if (data.total_meals.is_set)
 		data.total_meals.value = ft_atoi(argv[5]);
 	return data;
+}
+
+t_data *get_data(int argc, char **argv)
+{
+	t_data *data;
+
+    data = malloc(sizeof(t_data));
+	if (!are_valid_args(argv, argc))
+		return (panic("Invalid arguments."));
+	*data = get_input(argv, argc);
+	if (!is_valid_data(*data))
+		return (panic("Invalid data."));
+	return (data);
 }

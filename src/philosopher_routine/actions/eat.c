@@ -23,8 +23,6 @@ void	eat(t_thread_data *philosopher_data, size_t start_time)
 	pthread_mutex_lock(&philosopher_data->locks->latest_meal_time_lock);
 	philosopher_data->latest_meal_time = get_time();
 	pthread_mutex_unlock(&philosopher_data->locks->latest_meal_time_lock);
-	pthread_mutex_lock(&philosopher_data->locks->state_lock);
-	pthread_mutex_unlock(&philosopher_data->locks->state_lock);
 	pthread_mutex_lock(&philosopher_data->locks->print_lock);
 	printf("%zu	%d is eating\n",
 		get_time() - start_time,

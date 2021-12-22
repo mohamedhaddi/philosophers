@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 15:44:50 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/22 16:19:22 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 17:00:11 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,5 @@ int	main(int argc, char **argv)
 		return (free_allocated_memory(locks, philosophers, NULL, data));
 	destroy_mutexes(locks, *data);
 	free_allocated_memory(locks, philosophers, philosophers_satiated, data);
-	system("leaks philo");
 	return (EXIT_SUCCESS);
 }

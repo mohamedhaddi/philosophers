@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:20:43 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/22 12:53:13 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 16:21:07 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,5 +80,30 @@ t_data				*get_data(int argc, char **argv);
 t_data				get_input(char **argv, int argc);
 bool				is_valid_data(t_data data);
 void				*panic(char *error_message);
+int					ft_isdigit(int c);
+bool				is_integer(char *str);
+size_t				ft_strlen(const char *s);
+int					ft_atoi(const char *str);
+bool				is_over_int(char *str);
+t_threads			*create_philosophers(t_locks *locks, t_data data);
+void				*philosopher_routine(void *thread_data);
+bool				*supervise(t_data data, t_thread_data *philosophers_data);
+void				pick_forks(pthread_mutex_t *forks_locks,
+					t_thread_data *philosopher_data,
+					size_t start_time);
+void				eat(t_thread_data *philosopher_data, size_t start_time);
+void				release_forks(pthread_mutex_t *forks_locks,
+					t_thread_data *philosopher_data);
+void				take_a_nap(t_thread_data *philosopher_data, size_t start_time);
+void				think(t_thread_data *philosopher_data, size_t start_time);
+t_locks				*create_locks(t_data data);
+void				destroy_mutexes(t_locks *locks, t_data data);
+int					free_allocated_memory(t_locks *locks,
+					t_threads *philosophers,
+					bool *philosophers_satiated,
+					t_data *data);
+bool				all(bool *arr, size_t len);
+void				ft_usleep(size_t time_in_ms);
+size_t				get_time(void);
 
 #endif

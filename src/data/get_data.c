@@ -12,31 +12,19 @@
 
 #include "../../includes/philo.h"
 
-int	ft_atoi(const char *str)
+bool	is_valid_data(t_data data)
 {
-	int				j;
-	unsigned long	res;
-	int				temp;
-
-	temp = 1;
-	j = 0;
-	res = 0;
-	while (*str > 0 && *str <= 32)
-	{
-		if (*str == 27)
-			return (0);
-		str++;
-	}
-	if (*str == '-')
-	{
-		temp = -1;
-		str++;
-	}
-	else if (*str == '+')
-		str++;
-	while (*(str + j) >= 48 && *(str + j) <= 57)
-		res = res * 10 + *(str + j++) - '0';
-	return (res * temp);
+    if (data.number_of_philosophers <= 0)
+        return (false);
+    if (data.time_to_die < 0)
+        return (false);
+    if (data.time_to_eat < 0)
+        return (false);
+    if (data.time_to_sleep < 0)
+        return (false);
+    if (data.total_meals.value < 0)
+        return (false);
+    return (true);
 }
 
 t_data	get_input(char **argv, int argc)
@@ -53,6 +41,22 @@ t_data	get_input(char **argv, int argc)
 	if (data.total_meals.is_set)
 		data.total_meals.value = ft_atoi(argv[5]);
 	return (data);
+}
+
+int	are_valid_args(char **argv, int argc)
+{
+	int	i;
+
+	if (argc < 5 || argc > 6)
+		return (false);
+	i = 1;
+	while (i < argc)
+	{
+		if (is_over_int(argv[i]) || !is_integer(argv[i]))
+			return (false);
+		i++;
+	}
+	return (true);
 }
 
 t_data	*get_data(int argc, char **argv)

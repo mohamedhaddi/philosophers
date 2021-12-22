@@ -6,114 +6,114 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:19:11 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/13 01:34:33 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 12:50:54 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/philo.h"
 
-int ft_isdigit(int c)
+int	ft_isdigit(int c)
 {
-    if (c >= 48 && c <= 57)
-        return (1);
-    return (0);
+	if (c >= 48 && c <= 57)
+		return (1);
+	return (0);
 }
 
-bool    is_integer(char *str)
+bool	is_integer(char *str)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    if (str[0] == '-' && str[1])
-        i++;
-    while (str[i])
-    {
-        if (!ft_isdigit(str[i]))
-            return (false);
-        i++;
-    }
-    return (true);
-}
-void    init_index(int *i, bool is_negative)
-{
-    *i = 0;
-    if (is_negative)
-        *i = 1;
+	i = 0;
+	if (str[0] == '-' && str[1])
+		i++;
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (false);
+		i++;
+	}
+	return (true);
 }
 
-void    set_last_digit(char *last_digit, bool is_negative)
+void	init_index(int *i, bool is_negative)
 {
-    *last_digit = '7';
-    if (is_negative)
-        *last_digit = '8';
+	*i = 0;
+	if (is_negative)
+		*i = 1;
 }
 
-bool    check_every_digit(int i, int len, char last_digit, char **strings)
+void	set_last_digit(char *last_digit, bool is_negative)
 {
-    int     j;
-    char    *str;
-    char    *max_int;
-
-    str = strings[0];
-    max_int = strings[1];
-    j = 0;
-    while (i < len - 1)
-    {
-        if (str[i] > max_int[j])
-            return (true);
-        else if (str[i] < max_int[j])
-            return (false);
-        i++;
-        j++;
-    }
-    if (str[i] > last_digit)
-        return (true);
-    return (false);
+	*last_digit = '7';
+	if (is_negative)
+		*last_digit = '8';
 }
 
-size_t  ft_strlen(const char *s)
+bool	check_every_digit(int i, int len, char last_digit, char **strings)
 {
-    size_t  i;
+	int		j;
+	char	*str;
+	char	*max_int;
 
-    i = 0;
-    while (s[i] != '\0')
-        i++;
-    return (i);
+	str = strings[0];
+	max_int = strings[1];
+	j = 0;
+	while (i < len - 1)
+	{
+		if (str[i] > max_int[j])
+			return (true);
+		else if (str[i] < max_int[j])
+			return (false);
+		i++;
+		j++;
+	}
+	if (str[i] > last_digit)
+		return (true);
+	return (false);
 }
 
-bool    is_over_int(char *str)
+size_t	ft_strlen(const char *s)
 {
-    char    *max_int;
-    int     len;
-    bool    is_negative;
-    int     i;
-    char    last_digit;
+	size_t	i;
 
-    max_int = "2147483647";
-    len = ft_strlen(str);
-    is_negative = str[0] == '-';
-    init_index(&i, is_negative);
-    set_last_digit(&last_digit, is_negative);
-    if ((is_negative && len > 11) || (!is_negative && len > 10))
-        return (true);
-    if ((is_negative && len < 11) || (!is_negative && len < 10))
-        return (false);
-    return (check_every_digit(i, len, last_digit, (char *[2]){str, max_int}));
+	i = 0;
+	while (s[i] != '\0')
+		i++;
+	return (i);
 }
 
-int are_valid_args(char **argv, int argc)
+bool	is_over_int(char *str)
 {
-    int i;
+	char	*max_int;
+	int		len;
+	bool	is_negative;
+	int		i;
+	char	last_digit;
+
+	max_int = "2147483647";
+	len = ft_strlen(str);
+	is_negative = str[0] == '-';
+	init_index(&i, is_negative);
+	set_last_digit(&last_digit, is_negative);
+	if ((is_negative && len > 11) || (!is_negative && len > 10))
+		return (true);
+	if ((is_negative && len < 11) || (!is_negative && len < 10))
+		return (false);
+	return (check_every_digit(i, len, last_digit, (char *[2]){str, max_int}));
+}
+
+int	are_valid_args(char **argv, int argc)
+{
+	int	i;
 
 	if (argc < 5 || argc > 6)
 		return (false);
-    i = 1;
-    while (i < argc)
-    {
-	    if (is_over_int(argv[i]) || !is_integer(argv[i]))
-		    return (false);
-        i++;
-    }
-    return (true);
+	i = 1;
+	while (i < argc)
+	{
+		if (is_over_int(argv[i]) || !is_integer(argv[i]))
+			return (false);
+		i++;
+	}
+	return (true);
 }
-

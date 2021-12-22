@@ -6,7 +6,7 @@
 /*   By: mhaddi <mhaddi@student.1337.ma>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/12 18:22:54 by mhaddi            #+#    #+#             */
-/*   Updated: 2021/12/22 16:56:47 by mhaddi           ###   ########.fr       */
+/*   Updated: 2021/12/22 17:44:08 by mhaddi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,18 @@ t_data	*get_data(int argc, char **argv)
 	t_data	*data;
 
 	data = malloc(sizeof(t_data));
+	if (!data)
+		return (panic("Failed to malloc for data."));
 	if (!are_valid_args(argv, argc))
+	{
+		free(data);
 		return (panic("Invalid arguments."));
+	}
 	*data = get_input(argv, argc);
 	if (!is_valid_data(*data))
+	{
+		free(data);
 		return (panic("Invalid data."));
+	}
 	return (data);
 }
